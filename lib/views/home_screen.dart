@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart'; // ⬅️ Shimmer package zaroori hai
+import 'package:shimmer/shimmer.dart';
+import 'package:share_plus/share_plus.dart'; // ⬅️ Naya package import kiya
 import '../viewmodels/github_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -66,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.remove('search_history');
   }
 
-  // --- NAYA FUNCTION: Language ke hisab se color dene ke liye ---
   Color _getLanguageColor(String? lang) {
     if (lang == null) return Colors.grey;
     switch (lang.toLowerCase()) {
@@ -84,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Theme colors for Dark/Light mode support
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? const Color(0xFF161B22) : Colors.white;
     final scaffoldBg = isDark ? const Color(0xFF0D1117) : Colors.grey.shade100;
@@ -120,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: InputDecoration(
                     hintText: 'Enter GitHub Username...',
                     hintStyle: TextStyle(color: isDark ? Colors.grey : Colors.black54),
-                    prefixIcon: Icon(Icons.search_rounded, color: Colors.blueAccent),
+                    prefixIcon: const Icon(Icons.search_rounded, color: Colors.blueAccent),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear_rounded, color: Colors.grey),
                       onPressed: () {
@@ -170,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 15),
 
-              // Search Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -191,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Consumer<GithubProvider>(
                   builder: (context, provider, child) {
                     if (provider.isLoading) {
-                      return _buildShimmerLoading(isDark); // ⬅️ Naya Shimmer Call
+                      return _buildShimmerLoading(isDark);
                     }
 
                     if (provider.errorMessage.isNotEmpty) {
@@ -217,8 +215,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   CircleAvatar(radius: 45, backgroundImage: NetworkImage(user.avatarUrl)),
                                   const SizedBox(height: 15),
-                                  Text(user.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                  Text("@${user.login}", style: const TextStyle(color: Colors.blueAccent)),
+
+                                  // --- UPDATED: Name + Share Button ---
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(width: 40), // Balance ke liye
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            Text(user.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                            Text("@${user.login}", style: const TextStyle(color: Colors.blueAccent)),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.share_outlined, color: Colors.blueAccent),
+                                        onPressed: () {
+                                          Share.share(
+                                            'Check out this GitHub profile: ${user.name} (@${user.login})\n'
+                                                'https://github.com/${user.login}',
+                                            subject: 'GitHub Profile of ${user.name}',
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+
                                   const SizedBox(height: 10),
                                   Text(user.bio, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
                                   const SizedBox(height: 20),
@@ -238,7 +261,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             const Text("Repositories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 10),
 
-                            // Updated Repos List with Language Colors
                             ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
@@ -292,8 +314,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- UI WIDGETS ---
-
   Widget _buildStat(String label, int count) {
     return Column(
       children: [
@@ -303,7 +323,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- SHIMMER LOADING UI ---
   Widget _buildShimmerLoading(bool isDark) {
     return Shimmer.fromColors(
       baseColor: isDark ? Colors.grey.shade900 : Colors.grey.shade300,
