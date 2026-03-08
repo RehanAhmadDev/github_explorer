@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:share_plus/share_plus.dart'; // ⬅️ Naya package import kiya
+import 'package:share_plus/share_plus.dart';
 import '../viewmodels/github_provider.dart';
+import 'repo_details_screen.dart'; // ⬅️ WebView screen ki import lazmi hai
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -215,12 +216,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   CircleAvatar(radius: 45, backgroundImage: NetworkImage(user.avatarUrl)),
                                   const SizedBox(height: 15),
-
-                                  // --- UPDATED: Name + Share Button ---
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const SizedBox(width: 40), // Balance ke liye
+                                      const SizedBox(width: 40),
                                       Expanded(
                                         child: Column(
                                           children: [
@@ -241,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ],
                                   ),
-
                                   const SizedBox(height: 10),
                                   Text(user.bio, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
                                   const SizedBox(height: 20),
@@ -272,6 +270,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   margin: const EdgeInsets.only(bottom: 12),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                   child: ListTile(
+                                    // --- WEBVIEW NAVIGATION ON TAP ---
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => RepoDetailsScreen(
+                                            url: repo.htmlUrl,
+                                            title: repo.name,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     contentPadding: const EdgeInsets.all(15),
                                     title: Text(repo.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent)),
                                     subtitle: Column(
